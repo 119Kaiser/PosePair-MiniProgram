@@ -2,7 +2,32 @@
   "compileType": "miniprogram",
   "libVersion": "trial",
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+    {
+      "type": "folder",
+      "value": "docs"
+    },
+    {
+      "type": "file",
+      "value": "README.md"
+    },
+    {
+      "type": "file",
+      "value": "LICENSE"
+    },
+    {
+      "type": "file",
+      "value": "ROADMAP.md"
+    },
+    {
+      "type": "folder",
+      "value": ".git"
+    },
+    {
+      "type": "folder",
+      "value": ".github"
+    }
+  ],
     "include": []
   },
   "setting": {

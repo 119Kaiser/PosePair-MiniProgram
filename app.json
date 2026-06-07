@@ -1,0 +1,23 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/logs/logs"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "Weixin",
+    "navigationBarBackgroundColor": "#ffffff"
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "permission": {
+    "scope.camera": {
+      "desc": "\u7528\u4e8e\u62cd\u6444 Before/After \u5bf9\u6bd4\u7167\u7247"
+    },
+    "scope.writePhotosAlbum": {
+      "desc": "\u7528\u4e8e\u4fdd\u5b58\u62cd\u6444\u7167\u7247\u548c\u751f\u6210\u7684\u5bf9\u6bd4\u56fe"
+    }
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

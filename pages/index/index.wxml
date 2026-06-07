@@ -1,0 +1,290 @@
+<view class="page">
+  <view wx:if="{{status === 'home'}}" class="home-page">
+    <view class="home-header">
+      <text class="home-title">对比一拍</text>
+      <text class="home-subtitle">精准复刻拍摄角度</text>
+    </view>
+
+    <view class="home-logo-wrap">
+      <image class="home-logo" src="/img/homepage_logo_trimmed.png" mode="widthFix"></image>
+    </view>
+
+    <text class="home-desc">支持轮廓参考、透明叠加、拼接导出</text>
+
+    <view class="home-actions">
+      <view class="home-card home-card-before" bindtap="startBeforeFlow">
+        <view class="home-card-icon before-icon">
+          <view class="home-icon-corner corner-tl"></view>
+          <view class="home-icon-corner corner-tr"></view>
+          <view class="home-icon-corner corner-bl"></view>
+          <view class="home-icon-corner corner-br"></view>
+          <view class="home-icon-mountain"></view>
+        </view>
+        <view class="home-card-copy">
+          <text class="home-card-title">拍Before</text>
+          <text class="home-card-text">使用轮廓参考拍摄Before照</text>
+        </view>
+        <text class="home-card-arrow">›</text>
+      </view>
+
+      <view class="home-card home-card-after" bindtap="startAfterFlow">
+        <view class="home-card-icon after-icon">
+          <view class="home-icon-corner corner-tl"></view>
+          <view class="home-icon-corner corner-tr"></view>
+          <view class="home-icon-corner corner-bl"></view>
+          <view class="home-icon-corner corner-br"></view>
+          <view class="home-icon-mountain"></view>
+        </view>
+        <view class="home-card-copy">
+          <text class="home-card-title">拍After</text>
+          <text class="home-card-text">导入照片参考拍摄After照</text>
+        </view>
+        <text class="home-card-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="home-privacy">
+      <view class="home-lock-icon">
+        <view class="home-lock-shackle"></view>
+        <view class="home-lock-body"></view>
+      </view>
+      <text class="home-privacy-text">所有照片仅保存在本地，更安全、更私密</text>
+    </view>
+  </view>
+
+  <view wx:if="{{isImportingBefore}}" class="import-loading-mask">
+    <view class="import-loading-box">图片导入中</view>
+  </view>
+
+  <view wx:if="{{status === 'before' || status === 'after'}}" class="top-panel">
+    <view class="angle-bar">
+      <view class="angle-indicator" style="left: {{angleIndicatorLeft}}%;"></view>
+      <button
+        wx:for="{{angles}}"
+        wx:key="value"
+        class="angle-button {{currentAngle === item.value ? 'angle-button-active' : ''}}"
+        size="mini"
+        data-angle="{{item.value}}"
+        bindtap="selectAngle"
+      >
+        {{item.label}}
+      </button>
+    </view>
+  </view>
+
+  <view wx:if="{{status === 'before' || status === 'after'}}" class="camera-wrap">
+    <camera
+      class="camera"
+      device-position="{{devicePosition}}"
+      flash="off"
+      mode="normal"
+      binderror="onCameraError"
+    ></camera>
+
+    <cover-image
+      wx:if="{{status === 'after' && !previewImage && !isTakingPhoto && beforeImage}}"
+      class="before-overlay"
+      src="{{beforeImage}}"
+      style="opacity: {{overlayOpacity}};"
+    ></cover-image>
+
+    <cover-view wx:if="{{!previewImage && !isTakingPhoto && showGuide}}" class="guide-layer">
+      <cover-image
+        class="guide-image"
+        src="{{guideImagePath}}"
+        style="width: {{guideWidth}}px; height: {{guideHeight}}px;"
+      ></cover-image>
+    </cover-view>
+
+    <cover-image
+      wx:if="{{status === 'after' && !previewImage && !isTakingPhoto && silhouetteEnabled && silhouetteImage}}"
+      class="silhouette-overlay"
+      src="{{silhouetteImage}}"
+    ></cover-image>
+
+    <cover-view wx:if="{{status === 'after' && !previewImage && !isTakingPhoto && silhouetteLoading}}" class="face-outline-loading">
+      图片加载中
+    </cover-view>
+
+    <cover-view wx:if="{{status === 'after' && !previewImage && !isTakingPhoto}}" class="overlay-slider">
+      <cover-view class="overlay-slider-text">透明度</cover-view>
+      <cover-view class="overlay-slider-track vertical-opacity-track">
+        <cover-view class="overlay-slider-base"></cover-view>
+        <cover-view
+          wx:for="{{opacityOptions}}"
+          wx:key="percent"
+          class="opacity-node {{item.active ? 'opacity-node-active' : ''}}"
+          style="top: {{item.top}}%;"
+          data-percent="{{item.percent}}"
+          bindtap="selectOpacity"
+        >
+          <cover-view class="opacity-dot"></cover-view>
+          <cover-view class="opacity-label">{{item.percent}}%</cover-view>
+        </cover-view>
+        <cover-view class="opacity-active-dot" style="top: {{activeOpacityTop}}%;"></cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!previewImage && !isTakingPhoto}}" class="shutter-wrap">
+      <cover-view class="shutter-button" bindtap="takePhoto">
+        <cover-view class="shutter-inner"></cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!previewImage && !isTakingPhoto}}" class="camera-flip-button" bindtap="toggleCameraPosition">
+      <cover-view class="camera-flip-icon">↻</cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{status === 'after' && !previewImage && !isTakingPhoto}}" class="face-outline-toggle-group">
+      <cover-view
+        class="face-outline-toggle {{silhouetteEnabled ? 'face-outline-toggle-active' : ''}}"
+        bindtap="toggleSilhouette"
+      >
+        <cover-view class="face-outline-toggle-text">原图速写</cover-view>
+      </cover-view>
+    </cover-view>
+  </view>
+
+  <view wx:if="{{previewImage}}" class="photo-preview">
+    <image class="photo" src="{{previewImage}}" mode="aspectFit"></image>
+  </view>
+
+  <view wx:if="{{(status === 'before' || status === 'after') && !isTakingPhoto}}" class="bottom-bar">
+    <block wx:if="{{previewImage}}">
+      <button class="action-button retry-button" bindtap="retakePhoto">重拍</button>
+      <button class="action-button confirm-button" bindtap="confirmPhoto">确认</button>
+      <button class="action-button retry-button" bindtap="goHome">返回首页</button>
+    </block>
+
+    <block wx:else>
+      <button
+        class="action-button guide-action-button {{showGuide ? 'guide-action-button-active' : ''}}"
+        data-show="true"
+        bindtap="setGuideVisible"
+      >显示轮廓</button>
+      <button
+        class="action-button guide-action-button {{!showGuide ? 'guide-action-button-active' : ''}}"
+        data-show="false"
+        bindtap="setGuideVisible"
+      >隐藏轮廓</button>
+      <button class="action-button retry-button" bindtap="goHome">返回首页</button>
+    </block>
+  </view>
+
+  <view wx:if="{{status === 'result'}}" class="result-page">
+    <view class="edit-stage">
+      <view class="edit-shot">
+        <view
+          class="edit-image-box before-edit-box"
+          style="width: {{beforeEditWidth}}px; height: {{beforeEditHeight}}px;"
+          data-target="before"
+          bindtouchstart="onImageTouchStart"
+          bindtouchmove="onImageTouchMove"
+          bindtouchend="onImageTouchEnd"
+          bindtouchcancel="onImageTouchEnd"
+        >
+          <image
+            class="edit-image"
+            src="{{beforeImage}}"
+            mode="aspectFill"
+            style="transform: translate({{beforeTransform.x}}px, {{beforeTransform.y}}px) scale({{beforeTransform.scale}});"
+          ></image>
+        </view>
+        <view class="edit-label-wrap" data-target="before" bindtap="openLabelEditor">
+          <text class="edit-label">{{beforeLabel}}</text>
+          <image class="edit-label-icon" src="/img/edit.png" mode="aspectFit"></image>
+        </view>
+      </view>
+
+      <view class="edit-shot">
+        <view
+          class="edit-image-box after-edit-box"
+          style="width: {{afterEditWidth}}px; height: {{afterEditHeight}}px;"
+          data-target="after"
+          bindtouchstart="onImageTouchStart"
+          bindtouchmove="onImageTouchMove"
+          bindtouchend="onImageTouchEnd"
+          bindtouchcancel="onImageTouchEnd"
+        >
+          <image
+            class="edit-image"
+            src="{{afterImage}}"
+            mode="aspectFill"
+            style="transform: translate({{afterTransform.x}}px, {{afterTransform.y}}px) scale({{afterTransform.scale}});"
+          ></image>
+        </view>
+        <view class="edit-label-wrap" data-target="after" bindtap="openLabelEditor">
+          <text class="edit-label">{{afterLabel}}</text>
+          <image class="edit-label-icon" src="/img/edit.png" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+
+    <view class="result-actions">
+      <button class="done-button secondary-done-button" data-target="before" bindtap="resetImageTransform">重置之前</button>
+      <button class="done-button secondary-done-button" data-target="after" bindtap="resetImageTransform">重置之后</button>
+      <button class="done-button secondary-done-button" bindtap="retakeAfterFromResult">重新拍摄</button>
+      <button class="done-button export-button" disabled="{{isGeneratingCompare || !editLayoutReady}}" bindtap="generateCompareImage">{{isGeneratingCompare ? '生成中' : '生成拼接图'}}</button>
+      <button class="done-button reset-button" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+
+  <view wx:if="{{status === 'merged'}}" class="merged-page">
+    <view
+      class="merged-preview-stage"
+      bindtouchstart="onMosaicTouchStart"
+      bindtouchmove="onMosaicTouchMove"
+      bindtouchend="onMosaicTouchEnd"
+      bindtouchcancel="onMosaicTouchEnd"
+    >
+      <image class="merged-preview-image" src="{{compareImage}}" mode="aspectFit"></image>
+      <view wx:if="{{mosaicBlocks.length}}" class="mosaic-layer">
+        <view
+          wx:for="{{mosaicViews}}"
+          wx:key="id"
+          class="mosaic-block"
+          style="left: {{item.left}}px; top: {{item.top}}px; width: {{item.size}}px; height: {{item.size}}px;"
+        ></view>
+      </view>
+    </view>
+
+    <view class="merged-actions">
+      <button class="done-button secondary-done-button" bindtap="toggleMosaic">{{mosaicEnabled ? '重置马赛克' : '画马赛克'}}</button>
+      <button class="done-button secondary-done-button" bindtap="cycleCompareTextAlign">{{textAlignButtonText}}</button>
+      <button class="done-button secondary-done-button" bindtap="returnToAdjust">重新拼接</button>
+      <button class="done-button export-button" disabled="{{isGeneratingCompare}}" bindtap="saveResult">{{isGeneratingCompare ? '处理中' : '导出图片'}}</button>
+      <button class="done-button reset-button" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+
+  <view wx:if="{{editingLabelTarget}}" class="label-editor-mask">
+    <view class="label-editor">
+      <text class="label-editor-title">修改文字</text>
+      <view class="label-input-row">
+        <input
+          class="label-input"
+          value="{{editingLabelValue}}"
+          focus
+          bindinput="onLabelInput"
+        />
+        <text class="label-count">{{editingLabelValue.length}}/8</text>
+      </view>
+      <view class="label-editor-actions">
+        <button class="label-editor-button secondary-label-button" bindtap="cancelLabelEditor">取消</button>
+        <button class="label-editor-button primary-label-button" bindtap="confirmLabelEditor">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <canvas
+    class="merge-canvas"
+    canvas-id="mergeCanvas"
+    style="width: {{mergeCanvasWidth}}px; height: {{mergeCanvasHeight}}px;"
+  ></canvas>
+
+  <canvas
+    class="face-canvas"
+    canvas-id="faceCanvas"
+    style="width: {{faceCanvasWidth}}px; height: {{faceCanvasHeight}}px;"
+  ></canvas>
+</view>
